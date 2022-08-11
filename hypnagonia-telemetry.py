@@ -44,7 +44,7 @@ class Generation(Resource):
         parser.add_argument("generation", type=str, required=True, help="Content of the generattion")
         parser.add_argument("title", type=str, required=True, help="The name of the thing for which we're generating")
         parser.add_argument("type", type=str, required=True, help="The type of generation it is. This is used for finding previous such generations")
-        parser.add_argument("liked", type=bool, required=True, help="True if the user liked it, False if they did not.")
+        parser.add_argument("classification", type=int, required=True, help="An enum for whether the player liked this story and the classification of such")
         parser.add_argument("client_id", type=str, required=True, help="The unique ID for this version of Hypnagonia client")
         args = parser.parse_args()
         gtitle = args["title"]
@@ -52,7 +52,7 @@ class Generation(Resource):
         guuid = args["uuid"]
         generation = args["generation"]
         gclid = args["client_id"]
-        liked = args["liked"]
+        classification = args["classification"]
         if gtitle not in generations:
             generations[gtitle] = {}
         if gtype not in generations[gtitle]:
@@ -62,10 +62,10 @@ class Generation(Resource):
                 "generation": generation,
                 "ratings": {}
             }
-        if gclid in generations[gtitle][gtype][guuid]["ratings"] and generations[gtitle][gtype][guuid]["ratings"][gclid] == liked:
+        if gclid in generations[gtitle][gtype][guuid]["ratings"] and generations[gtitle][gtype][guuid]["ratings"][gclid] == classification:
             return(204)
         else:
-            generations[gtitle][gtype][guuid]["ratings"][gclid] = liked
+            generations[gtitle][gtype][guuid]["ratings"][gclid] = classification
         write_to_disk()
         return(204)
 
