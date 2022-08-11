@@ -47,7 +47,7 @@ def after_request(response):
 	return response
 
 class Generation(Resource):
-    # decorators = [limiter.limit("4/minute")]
+    decorators = [limiter.limit("10/minute")]
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("uuid", type=str, required=True, help="UUID of the generation")
@@ -80,12 +80,12 @@ class Generation(Resource):
                 return(204)
             else:
                 evaluating_generations[guuid]["ratings"][gclid] = classification
-                # We need 10 different players to evaluate one generation to consider it finalized
+                # We need 5 different players to evaluate one generation to consider it finalized
 
                 if len(evaluating_generations[guuid]["ratings"]) >= 1:
                     highest_ratings = get_rating(guuid)
                     evaluated_gen = evaluating_generations.pop(guuid)
-                    # 0 means most people disliked this generation, so we forget it
+                    # 0 means most people disliked this generation, so we forget the generation if 0 is one of the highest ratings
                     if 0 not in highest_ratings:
                         finalized_generations[guuid] = evaluated_gen
                         print("Finalizing generation: " + generation)
@@ -93,6 +93,19 @@ class Generation(Resource):
                         print("Rejecting generation: " + generation)
         write_to_disk()
         return(204)
+
+class EvaluatingGenerations(Resource):
+    decorators = [limiter.limit("2/minute")]
+    def get(self):
+        return(json.dump(evaluating_generations), 200)
+
+    def options(self):
+        return("OK", 200)
+
+class FinalizedGenerations(Resource):
+    decorators = [limiter.limit("2/minute")]
+    def get(self):
+        return(json.dump(finalized_generations), 200)
 
     def options(self):
         return("OK", 200)
@@ -107,6 +120,8 @@ if __name__ == "__main__":
             finalized_generations = json.load(db)
     stat_args = arg_parser.parse_args()
     api.add_resource(Generation, "/generation/")
+    api.add_resource(EvaluatingGenerations, "/generations/evaluating/")
+    api.add_resource(FinalizedGenerations, "/generations/finalized/")
     from waitress import serve
     serve(REST_API, host=stat_args.ip, port=stat_args.port)
     # REST_API.run(debug=True,host=stat_args.ip,port=stat_args.port)
