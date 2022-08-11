@@ -11,7 +11,9 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('-i', '--ip', action="store", default='127.0.0.1', help="The listening IP Address")
 arg_parser.add_argument('-p', '--port', action="store", default='8000', help="The listening Port")
 
-db_filename = "database.json"
+generations_filename = "generations.json"
+stats_filename = "stats.json"
+
 REST_API = Flask(__name__)
 # Very basic DOS prevention
 limiter = Limiter(
@@ -24,7 +26,7 @@ api = Api(REST_API)
 generations = {}
 
 def write_to_disk():
-	with open(db_filename, 'w') as db:
+	with open(generations_filename, 'w') as db:
 		json.dump(generations,db)
 
 @REST_API.after_request
@@ -73,8 +75,8 @@ class Generation(Resource):
 
 # Parse and print the results
 if __name__ == "__main__":
-    if os.path.isfile(db_filename):
-        with open(db_filename) as db:
+    if os.path.isfile(generations_filename):
+        with open(generations_filename) as db:
             games = json.load(db)
     stat_args = arg_parser.parse_args()
     api.add_resource(Generation, "/generation/")
