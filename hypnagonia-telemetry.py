@@ -5,12 +5,14 @@ from flask_limiter.util import get_remote_address
 from uuid import uuid4
 import json, os
 import argparse
+from collections import Counter
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('-i', '--ip', action="store", default='127.0.0.1', help="The listening IP Address")
 arg_parser.add_argument('-p', '--port', action="store", default='8000', help="The listening Port")
 
-generations_filename = "generations.json"
+evaluating_generations_filename = "evaluating_generations.json"
+finalized_generations_filename = "finalized_generations.json"
 stats_filename = "stats.json"
 
 REST_API = Flask(__name__)
@@ -22,11 +24,20 @@ limiter = Limiter(
 )
 api = Api(REST_API)
 
-generations = {}
+evaluating_generations = {}
+finalized_generations = {}
 
 def write_to_disk():
-	with open(generations_filename, 'w') as db:
-		json.dump(generations,db)
+	with open(evaluating_generations_filename, 'w') as db:
+		json.dump(evaluating_generations,db)
+	with open(finalized_generations_filename, 'w') as db:
+		json.dump(finalized_generations,db)
+
+
+def get_rating(guuid):
+    counts = Counter(evaluating_generations[guuid]["ratings"].values())
+    max_ratings = [key for key, value in counts.items() if value == max(counts.values())]
+    return(max_ratings)
 
 @REST_API.after_request
 def after_request(response):
@@ -52,19 +63,34 @@ class Generation(Resource):
         generation = args["generation"]
         gclid = args["client_id"]
         classification = args["classification"]
-        if gtitle not in generations:
-            generations[gtitle] = {}
-        if gtype not in generations[gtitle]:
-            generations[gtitle][gtype] = {}
-        if guuid not in generations[gtitle][gtype]:
-            generations[gtitle][gtype][guuid] = {
-                "generation": generation,
-                "ratings": {}
-            }
-        if gclid in generations[gtitle][gtype][guuid]["ratings"] and generations[gtitle][gtype][guuid]["ratings"][gclid] == classification:
-            return(204)
+        if guuid in finalized_generations:
+            if gclid in finalized_generations[guuid]["ratings"] and finalized_generations[guuid]["ratings"][gclid] == classification:
+                return(204)
+            else:
+                finalized_generations[guuid]["ratings"][gclid] = classification
         else:
-            generations[gtitle][gtype][guuid]["ratings"][gclid] = classification
+            if guuid not in evaluating_generations:
+                evaluating_generations[guuid] = {
+                    "generation": generation,
+                    "ratings": {},
+                    "title": gtitle,
+                    "type": gtype,
+                }
+            if gclid in evaluating_generations[guuid]["ratings"] and evaluating_generations[guuid]["ratings"][gclid] == classification:
+                return(204)
+            else:
+                evaluating_generations[guuid]["ratings"][gclid] = classification
+                # We need 10 different players to evaluate one generation to consider it finalized
+
+                if len(evaluating_generations[guuid]["ratings"]) >= 1:
+                    highest_ratings = get_rating(guuid)
+                    evaluated_gen = evaluating_generations.pop(guuid)
+                    # 0 means most people disliked this generation, so we forget it
+                    if 0 not in highest_ratings:
+                        finalized_generations[guuid] = evaluated_gen
+                        print("Finalizing generation: " + generation)
+                    else:
+                        print("Rejecting generation: " + generation)
         write_to_disk()
         return(204)
 
@@ -74,11 +100,13 @@ class Generation(Resource):
 
 # Parse and print the results
 if __name__ == "__main__":
-    if os.path.isfile(generations_filename):
-        with open(generations_filename) as db:
-            games = json.load(db)
+    if os.path.isfile(evaluating_generations_filename):
+        with open(evaluating_generations_filename) as db:
+            evaluating_generations = json.load(db)
+        with open(finalized_generations_filename) as db:
+            finalized_generations = json.load(db)
     stat_args = arg_parser.parse_args()
     api.add_resource(Generation, "/generation/")
     from waitress import serve
     serve(REST_API, host=stat_args.ip, port=stat_args.port)
-    # app.run(debug=True,host=stat_args.ip,port=stat_args.port)
+    # REST_API.run(debug=True,host=stat_args.ip,port=stat_args.port)
