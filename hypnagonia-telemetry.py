@@ -72,6 +72,7 @@ class Generation(Resource):
             if guuid not in evaluating_generations:
                 evaluating_generations[guuid] = {
                     "generation": generation,
+                    "submitter": gclid,
                     "ratings": {},
                     "title": gtitle,
                     "type": gtype,
