@@ -123,5 +123,5 @@ if __name__ == "__main__":
     api.add_resource(EvaluatingGenerations, "/generations/evaluating/")
     api.add_resource(FinalizedGenerations, "/generations/finalized/")
     from waitress import serve
-    # serve(REST_API, host=stat_args.ip, port=stat_args.port)
-    REST_API.run(debug=True,host=stat_args.ip,port=stat_args.port)
+    serve(REST_API, host=stat_args.ip, port=stat_args.port)
+    # REST_API.run(debug=True,host=stat_args.ip,port=stat_args.port)
