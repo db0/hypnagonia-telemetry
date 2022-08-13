@@ -51,6 +51,7 @@ def instance_verified(kai_instance, sent_model, sent_sp):
     valid_models = [
         "KoboldAI/fairseq-dense-2.7B-Nerys",
         "KoboldAI/fairseq-dense-13B-Nerys",
+        "KoboldAI/fairseq-dense-13B-Nerys-v2",
     ]
     try:
         model_req = requests.get(kai_instance + '/api/latest/model')
