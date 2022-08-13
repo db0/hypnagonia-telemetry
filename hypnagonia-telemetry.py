@@ -6,6 +6,7 @@ from uuid import uuid4
 import json, os
 import argparse
 from collections import Counter
+import requests
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('-i', '--ip', action="store", default='127.0.0.1', help="The listening IP Address")
@@ -46,6 +47,34 @@ def after_request(response):
 	response.headers["Access-Control-Allow-Headers"] = "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"
 	return response
 
+def instance_verified(kai_instance):
+    valid_models = [
+        "KoboldAI/fairseq-dense-2.7B-Nerys",
+        "KoboldAI/fairseq-dense-13B-Nerys",
+    ]
+    try:
+        model = requests.get(kai_instance + '/api/latest/model')
+    except:
+        return(False)
+    if type(model.json()) is not dict:
+        return(False)
+    if model.json()["result"] not in valid_models:
+        return(False)
+
+    try:
+        softprompt = requests.get(kai_instance + "/api/latest/config/soft_prompt")
+    except:
+        return(False)
+    if type(softprompt.json()) is not dict:
+        return(False)
+    valid_softprompts = [
+        "surrealism_and_dreams_2.7B.zip",
+        "surrealism_and_dreams_13B.zip",
+    ]
+    if softprompt.json()["value"] not in valid_softprompts:
+        return(False)
+    return(True)
+
 class Generation(Resource):
     decorators = [limiter.limit("10/minute")]
     def post(self):
@@ -56,7 +85,11 @@ class Generation(Resource):
         parser.add_argument("type", type=str, required=True, help="The type of generation it is. This is used for finding previous such generations")
         parser.add_argument("classification", type=int, required=True, help="An enum for whether the player liked this story and the classification of such")
         parser.add_argument("client_id", type=str, required=True, help="The unique ID for this version of Hypnagonia client")
+        parser.add_argument("kai_instance", type=str, required=True, help="The instance where Kobold AI is running on. We use it for verification.")
         args = parser.parse_args()
+        if not instance_verified(args["kai_instance"]):
+            print("Rejected")
+            return
         gtitle = args["title"]
         gtype = args["type"]
         guuid = args["uuid"]
