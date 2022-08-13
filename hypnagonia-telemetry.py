@@ -110,8 +110,6 @@ class Generation(Resource):
         parser.add_argument("model", type=str, required=True, help="The model the Kobold AI is using. We use it for verification.")
         parser.add_argument("soft_prompt", type=str, required=True, help="The soft_prompt the Kobold AI is using. We use it for verification.")
         args = parser.parse_args()
-        if not instance_verified(args["kai_instance"],args["model"],args["soft_prompt"]):
-            return
         gtitle = args["title"]
         gtype = args["type"]
         guuid = args["uuid"]
@@ -125,6 +123,8 @@ class Generation(Resource):
                 finalized_generations[guuid]["ratings"][gclid] = classification
         else:
             if guuid not in evaluating_generations:
+                if not instance_verified(args["kai_instance"],args["model"],args["soft_prompt"]):
+                    return
                 evaluating_generations[guuid] = {
                     "generation": generation,
                     "submitter": gclid,
