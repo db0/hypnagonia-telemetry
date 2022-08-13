@@ -53,18 +53,19 @@ def instance_verified(kai_instance, sent_model, sent_sp):
         "KoboldAI/fairseq-dense-13B-Nerys",
     ]
     try:
-        model = requests.get(kai_instance + '/api/latest/model')
-    except:
+        model_req = requests.get(kai_instance + '/api/latest/model')
+        model = model_req.json()
+        if type(model) is not dict:
+            print(f"Validation failed to parse softprompt API: {model_req.text}")
+            return(False)
+    except requests.exceptions.ConnectionError:
         if "http://127.0.0.1" in kai_instance or "http://localhost" in kai_instance:
             model = sent_model
         else:
             print(f"Validation failed to get URL: {kai_instance}/api/latest/model")
             return(False)
-    if type(model.json()) is not dict:
-        print(f"Validation failed to parse softprompt API: {model.text}")
-        return(False)
-    if model.json()["result"] not in valid_models:
-        print(f"Validation failed because {model.json()['result']} is not a valid model")
+    if model["result"] not in valid_models:
+        print(f"Validation failed because {model['result']} is not a valid model")
         return(False)
     if "http://127.0.0.1" not in kai_instance and "http://localhost" not in kai_instance:
         if sent_model != model:
@@ -72,22 +73,23 @@ def instance_verified(kai_instance, sent_model, sent_sp):
             return(False)
 
     try:
-        softprompt = requests.get(kai_instance + "/api/latest/config/soft_prompt")
-    except:
+        softprompt_req = requests.get(kai_instance + "/api/latest/config/soft_prompt")
+        softprompt = softprompt.json()
+        if type(softprompt) is not dict:
+            print(f"Validation failed to parse softprompt API: {softprompt_req.text}")
+            return(False)
+    except requests.exceptions.ConnectionError:
         if "http://127.0.0.1" in kai_instance or "http://localhost" in kai_instance:
             softprompt = sent_sp
         else:
             print(f"Validation failed to get URL: {kai_instance}/api/latest/config/soft_prompt")
             return(False)
-    if type(softprompt.json()) is not dict:
-        print(f"Validation failed to parse softprompt API: {softprompt.text}")
-        return(False)
     valid_softprompts = [
         "surrealism_and_dreams_2.7B.zip",
         "surrealism_and_dreams_13B.zip",
     ]
-    if softprompt.json()["value"] not in valid_softprompts:
-        print(f"Validation failed because {softprompt.json()['value']} is not a valid softprompt")
+    if softprompt["value"] not in valid_softprompts:
+        print(f"Validation failed because {softprompt['value']} is not a valid softprompt")
         return(False)
     if "http://127.0.0.1" not in kai_instance and "http://localhost" not in kai_instance:
         if sent_sp != softprompt:
