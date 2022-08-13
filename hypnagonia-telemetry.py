@@ -67,10 +67,9 @@ def instance_verified(kai_instance, sent_model, sent_sp):
     if model not in valid_models:
         print(f"Validation failed because {model} is not a valid model")
         return(False)
-    if "http://127.0.0.1" not in kai_instance and "http://localhost" not in kai_instance:
-        if sent_model != model:
-            print(f"Validation failed because payload model ({sent_model}) != discovered model ({model})")
-            return(False)
+    if sent_model != model:
+        print(f"Validation failed because payload model ({sent_model}) != discovered model ({model})")
+        return(False)
 
     try:
         softprompt_req = requests.get(kai_instance + "/api/latest/config/soft_prompt")
@@ -91,10 +90,9 @@ def instance_verified(kai_instance, sent_model, sent_sp):
     if softprompt not in valid_softprompts:
         print(f"Validation failed because {softprompt} is not a valid softprompt")
         return(False)
-    if "http://127.0.0.1" not in kai_instance and "http://localhost" not in kai_instance:
-        if sent_sp != softprompt:
-            print(f"Validation failed because payload softprompt {sent_sp} != discovered softprompt {softprompt}")
-            return(False)
+    if sent_sp != softprompt:
+        print(f"Validation failed because payload softprompt {sent_sp} != discovered softprompt {softprompt}")
+        return(False)
     return(True)
 
 class Generation(Resource):
