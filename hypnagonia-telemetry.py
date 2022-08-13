@@ -74,7 +74,7 @@ def instance_verified(kai_instance, sent_model, sent_sp):
 
     try:
         softprompt_req = requests.get(kai_instance + "/api/latest/config/soft_prompt")
-        if type(softprompt.json()) is not dict:
+        if type(softprompt_req.json()) is not dict:
             print(f"Validation failed to parse softprompt API: {softprompt_req.text}")
             return(False)
         softprompt = softprompt.json()["value"]
