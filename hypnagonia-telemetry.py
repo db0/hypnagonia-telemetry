@@ -77,7 +77,7 @@ def instance_verified(kai_instance, sent_model, sent_sp):
         if type(softprompt_req.json()) is not dict:
             print(f"Validation failed to parse softprompt API: {softprompt_req.text}")
             return(False)
-        softprompt = softprompt.json()["value"]
+        softprompt = softprompt_req.json()["value"]
     except requests.exceptions.ConnectionError:
         if "http://127.0.0.1" in kai_instance or "http://localhost" in kai_instance:
             softprompt = sent_sp
