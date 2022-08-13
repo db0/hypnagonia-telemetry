@@ -55,23 +55,29 @@ def instance_verified(kai_instance):
     try:
         model = requests.get(kai_instance + '/api/latest/model')
     except:
+        print("Validation failed to get URL: " + kai_instance + '/api/latest/model')
         return(False)
     if type(model.json()) is not dict:
+        print("Validation failed to parse softprompt API: " + model.text)
         return(False)
     if model.json()["result"] not in valid_models:
+        print("Validation failed because: " + model.json()["result"] + " is not a valid model")
         return(False)
 
     try:
         softprompt = requests.get(kai_instance + "/api/latest/config/soft_prompt")
     except:
+        print("Validation failed to get URL: " + kai_instance + "/api/latest/config/soft_prompt")
         return(False)
     if type(softprompt.json()) is not dict:
+        print("Validation failed to parse softprompt API: " + softprompt.text)
         return(False)
     valid_softprompts = [
         "surrealism_and_dreams_2.7B.zip",
         "surrealism_and_dreams_13B.zip",
     ]
     if softprompt.json()["value"] not in valid_softprompts:
+        print("Validation failed because: " + softprompt.json()["value"] + " is not a valid softprompt")
         return(False)
     return(True)
 
@@ -88,7 +94,6 @@ class Generation(Resource):
         parser.add_argument("kai_instance", type=str, required=True, help="The instance where Kobold AI is running on. We use it for verification.")
         args = parser.parse_args()
         if not instance_verified(args["kai_instance"]):
-            print("Rejected")
             return
         gtitle = args["title"]
         gtype = args["type"]
