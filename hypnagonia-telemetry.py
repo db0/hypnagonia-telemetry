@@ -53,7 +53,12 @@ def regenerate(encounters, encounter, type, amount):
         "title": encounters[encounter].get('title', encounter),
     }
     title = encounters[encounter].get('title', encounter)
-    prompt = f"[ Title: {title} ]\n{ai_prompt}"
+    memory = """[ All over the world, some unnatural force is causing individuals to start experiencing strange recurring dreams. The dreams feel hypnagogic and dreamers retain much more of their agency while in them. Each dreamer experiencing this phenomenon, is ensuring some great injustice in their life. Overcoming the torments in their dreams will allow them to have a breakthrough in their personal lives]
+[Unbeknownst to each dreamer, they are all connected to each other through a common dreamscape but the exact mechanics of this are yet unknown, with only glimpses of the presence of other dreamers sometimes manifesting. Some otherworldly force is somehow guiding dreamers to a common purpose.]
+[An unnamed dreamer finds themselves in a strange world and we're reading what they are writing in their dream journal next morning. The journal is written in the first person,and is storytelling what torments they dreamt of, in the previous night. They can't wake up! ]
+"""
+    author_note = "[ Tone: Focus on ethereal descriptions leaning on surrealism ]\n[ Writing style: First person, past tense ]"
+    prompt = f"{memory}{author_note}\n[ Title: {title} ]\n{ai_prompt}"
     gen_dict = {
         "prompt": prompt, 
         "params": {"max_length":60, "frmttriminc": True, "n":amount}, 
@@ -69,7 +74,6 @@ def regenerate(encounters, encounter, type, amount):
         return
     for new_story in new_stories:
         full_story = re.sub(r" \[ [\w ]+ \]([ .,;])", r'\1', ai_prompt) + new_story
-        logging.info(full_story)
         evaluating_generations[str(uuid4())] = {
             "generation": full_story,
             "ratings": {},
@@ -78,52 +82,42 @@ def regenerate(encounters, encounter, type, amount):
         }
     write_to_disk()
 
-class Generation(Resource):
+class Rate(Resource):
     decorators = [limiter.limit("10/minute")]
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("uuid", type=str, required=True, help="UUID of the generation")
-        parser.add_argument("generation", type=str, required=True, help="Content of the generattion")
-        parser.add_argument("title", type=str, required=True, help="The name of the thing for which we're generating")
-        parser.add_argument("type", type=str, required=True, help="The type of generation it is. This is used for finding previous such generations")
         parser.add_argument("classification", type=int, required=True, help="An enum for whether the player liked this story and the classification of such")
         parser.add_argument("client_id", type=str, required=True, help="The unique ID for this version of Hypnagonia client")
         args = parser.parse_args()
-        gtitle = args["title"]
-        gtype = args["type"]
         guuid = args["uuid"]
-        generation = args["generation"]
         gclid = args["client_id"]
         classification = args["classification"]
         if guuid in finalized_generations:
+            if gclid not in finalized_generations[guuid]["ratings"]:
+                logging.info(f"Rating ({len(evaluating_generations[guuid]['ratings']) + 1}) received for finalized gen: {finalized_generations[guuid]['title']}")
             if gclid in finalized_generations[guuid]["ratings"] and finalized_generations[guuid]["ratings"][gclid] == classification:
                 return(204)
             else:
                 finalized_generations[guuid]["ratings"][gclid] = classification
         else:
-            if guuid not in evaluating_generations:
-                evaluating_generations[guuid] = {
-                    "generation": generation,
-                    "submitter": gclid,
-                    "ratings": {},
-                    "title": gtitle,
-                    "type": gtype,
-                }
             if gclid in evaluating_generations[guuid]["ratings"] and evaluating_generations[guuid]["ratings"][gclid] == classification:
                 return(204)
             else:
+                if gclid not in evaluating_generations[guuid]["ratings"]:
+                    logging.info(f"Rating ({len(evaluating_generations[guuid]['ratings']) + 1}/5) received for evaluating gen: {evaluating_generations[guuid]['title']}")
                 evaluating_generations[guuid]["ratings"][gclid] = classification
                 # We need 5 different players to evaluate one generation to consider it finalized
 
-                if len(evaluating_generations[guuid]["ratings"]) >= 5:
+                if len(evaluating_generations[guuid]["ratings"]) >= 1:
                     highest_ratings = get_rating(guuid)
                     evaluated_gen = evaluating_generations.pop(guuid)
                     # 0 means most people disliked this generation, so we forget the generation if 0 is one of the highest ratings
                     if 0 not in highest_ratings:
                         finalized_generations[guuid] = evaluated_gen
-                        print("Finalizing generation: " + generation)
+                        logging.info(f"Finalizing generation {guuid} - {evaluated_gen['title']}")
                     else:
-                        print("Rejecting generation: " + generation)
+                        logging.info(f"Rejecting generation {guuid} - {evaluated_gen['title']}")
         write_to_disk()
         return(204)
 
@@ -193,9 +187,9 @@ if __name__ == "__main__":
             finalized_generations = json.load(db)
     stat_args = arg_parser.parse_args()
     GenerateStories()
-    api.add_resource(Generation, "/generation/")
-    api.add_resource(EvaluatingGenerations, "/generations/evaluating/")
-    api.add_resource(FinalizedGenerations, "/generations/finalized/")
+    api.add_resource(Rate, "/rate")
+    api.add_resource(EvaluatingGenerations, "/generations/evaluating")
+    api.add_resource(FinalizedGenerations, "/generations/finalized")
     from waitress import serve
     serve(REST_API, host=stat_args.ip, port=stat_args.port)
     # REST_API.run(debug=True,host=stat_args.ip,port=stat_args.port)
