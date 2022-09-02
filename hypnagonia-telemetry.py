@@ -109,7 +109,7 @@ class Rate(Resource):
                 evaluating_generations[guuid]["ratings"][gclid] = classification
                 # We need 5 different players to evaluate one generation to consider it finalized
 
-                if len(evaluating_generations[guuid]["ratings"]) >= 1:
+                if len(evaluating_generations[guuid]["ratings"]) >= 5:
                     highest_ratings = get_rating(guuid)
                     evaluated_gen = evaluating_generations.pop(guuid)
                     # 0 means most people disliked this generation, so we forget the generation if 0 is one of the highest ratings
