@@ -1,0 +1,377 @@
+{
+	"The Laughing Ones": {
+		"prompts": {
+			"journal_choice": [
+				"It was the unending cackle [ of the laughing ones ] that did it",
+				"I found myself surrounded by featureless laughing faces"
+			]
+		},
+		"title": "Surrounded by mocking laughter"
+	},
+	"The Critic": {
+		"prompts": {
+			"journal_choice": [
+				"The hilarity of their appearance wasn't enough to dull the cut of their review as the critics beset me",
+				"Each assessment painfull accurate, the critics were callous in their critique."
+			]
+		},
+		"title": "The Critic's uncomfortable gaze"
+	},
+	"Fearmonger": {
+		"prompts": {
+			"journal_choice": [
+				"The third eye [ of the fearmonger ] was focused on me",
+				"As I felt dread encompass me, I looked around to see the Fearmonger focusing on me [ with their three eyes ]"
+			]
+		},
+		"title": "The Fearmonger watches"
+	},
+	"Murmurs": {
+		"prompts": {
+			"journal_choice": [
+				"The murmurs were all around me. I was sure it was about me.",
+				"I hated the whispering judgements [ of the murmurs ] that were just at the edge of my hearing"
+			]
+		},
+		"title": "Murmurs in the wind"
+	},
+	"Clown": {
+		"prompts": {
+			"journal_choice": [
+				"I found myself in the middle of an argument with a clown",
+				"How long have I been talking to this clown?",
+				"The back and forth between me and the clown was endless",
+				"I've never discussed philosophy [ with a clown ] in such a manner before"
+			]
+		},
+		"title": "Arguing with a Clown"
+	},
+	"Butterfly": {
+		"prompts": {
+			"journal_choice": [
+				"What a depressive butterfly which has beset me",
+				"The beauty I saw [ in the butterfly ] was countered by the sadness I felt in it's flutter."
+			]
+		},
+		"title": "Such a depressive butterfly"
+	},
+	"Broken Mirrors": {
+		"prompts": {
+			"journal_choice": [
+				"Am I unlucky [ to break these mirrors ] or is it just bad luck?",
+				"I saw myself reflected a thousand times, in the shards of the broken mirror"
+			]
+		},
+		"title": "The kaleidoscope of broken mirrors"
+	},
+	"Pialephant": {
+		"prompts": {
+			"journal_choice": [
+				"The thundering of the ground felt like a perfect accompanyment to the weighty piano sound [ coming from the pialephant ].",
+				"I cowered before the Pialephant, as the piano keyboard that was its nose lay before me, daring me to play the first note."
+			]
+		},
+		"title": "Pachydermic Music"
+	},
+	"The Light Calling": {
+		"prompts": {
+			"journal_choice": [
+				"Is this the light calling me, the end of the tunnel, or something worse?",
+				"I am beckoned [ to The Light Calling ] and I cannot stop myself"
+			]
+		},
+		"title": "The Light Calling"
+	},
+	"Baby": {
+		"prompts": {
+			"journal_choice": [
+				"I found myself at babysitting duty. I did not feel ready.",
+				"The situation was not optimal. The baby was already edging towards a tantrum and my hands were full."
+			]
+		},
+		"title": "The struggles of the unprepared babysitter"
+	},
+	"Squirrel": {
+		"prompts": {
+			"journal_choice": [
+				"This squirrel was the worst! It wouldn't let me pass.",
+				"Never before have I encountered such a intimidating rodent [ as the squirrel ]."
+			]
+		},
+		"title": "One pissed off rodent"
+	},
+	"Gaslighter": {
+		"prompts": {
+			"journal_choice": [
+				"The sphrerical head [ of the gaslighter ] dismissed my concerns",
+				"\"Did it realy happen this way?\", the Gaslighter whispered to me, as I struggled to keep in mind the true memory"
+			]
+		},
+		"title": "Gaslight manifest"
+	},
+	"Labyrinth": {
+		"prompts": {
+			"journal_choice": [
+				"I found myself trapped [ In a meandering Labyrinth ] with no way out",
+				"The maze yawned before me, beckoning me to be lost in it, as a challenge",
+				"What terror awaits behind those ever changing corners of this labyrinth? Is there even a way out, our will I forever be trapped in the bowels of this trap, slowly digested by my anxiety?",
+				"The pulsating, living, cringing walks of the labyrinth-like cave seem to close in on me as I am forced to follow the winding paths of my unconscious, not knowing whether I will ever fins the exit or rather"
+			]
+		},
+		"title": "Lost in a Maze With No String"
+	},
+	"Bully": {
+		"prompts": {
+			"journal_choice": [
+				"Was there always so many bullies in my school, or did they gather just for the occasion",
+				"\"What's the matter, gonna cry?\", my bully inquired, as I strugged to compose myself",
+				"I could see them coming around the corner, [ the bully ] finishing shaking down some of the other kids. Soon it would be my turn"
+			]
+		},
+		"title": "The Schoolyard Revisited in Pain"
+	},
+	"Leviathan": {
+		"prompts": {
+			"journal_choice": [
+				"The manifestation of the my own universal insignificancy loomed over me like a sky leviathan"
+			]
+		},
+		"title": "My Tiny Place in the Cosmos"
+	},
+	"Narcissus": {
+		"prompts": {
+			"journal_choice": [
+				"\"When did I ever hurt you?\", Narcissus pleaded with a pained [ but fake ] voice",
+				"The abuse was unbearable lately, but getting Narcissus to see themselves as what they truly are is downright impossible"
+			]
+		},
+		"title": "It's Not Me, it's You!"
+	},
+	"Traffic Jam": {
+		"prompts": {
+			"journal_choice": [
+				"I was stuck in traffic, in a bottleneck that stretched accross the horizon",
+				"I was caught in the never-ending traffic jam before me. I had places to go, things to do!",
+				"The traffic jam was an endless torture. Was it even worth",
+				"The traffic jam of anger blocked the stairway to happiness. I was at a dead end"
+			]
+		},
+		"title": "Frustration unending"
+	},
+	"Mouse": {
+		"prompts": {
+			"journal_choice": [
+				"I was having polite tea with a mouse, discussing political theory",
+				"The squeaky voice of the mouse rattled my brain around with its hyperactive intelligence. I understood nothing",
+				"The teacups shattered onto the floor as the words began to spill out of the mouse's erratic mouth",
+				"The mouse was too smart for me. It predicted every word I said, transforming them inton a convoluted theory"
+			]
+		},
+		"title": "Polite company with a mouse"
+	},
+	"The Exam": {
+		"prompts": {
+			"journal_choice": [
+				"The bell rang and I breathlessly took my seat, just in time for the exam"
+			]
+		},
+		"title": "Pencils ready for the test"
+	},
+	"The Victim": {
+		"prompts": {
+			"journal_choice": [
+				"I know I didn't do anything wrong but they [ the fake victim ] kept insising I hurt their feelings"
+			]
+		},
+		"title": "Playing the victim once more"
+	},
+	"Stuffed Toy": {
+		"prompts": {
+			"journal_choice": [
+				"The wrestling [ with my stuffed toy ] was becoming more intense."
+			]
+		},
+		"title": "Wrestling with a Plushie"
+	},
+	"Impossible Construction": {
+		"prompts": {
+			"journal_choice": [
+				"Like a painting from M.C. Escher, I could not understand where this construction started and where it ended",
+				"The physics of the building that stood before me were straining my brain"
+			]
+		},
+		"title": "The building that should not be"
+	},
+	"Guilty Treatment": {
+		"prompts": {
+			"journal_choice": [
+				"The guilt trip was too much, as I tried to get through their silent treatment"
+			]
+		},
+		"title": "Guilt Trip and Silent Treatment"
+	},
+	"Void": {
+		"prompts": {
+			"journal_choice": [
+				"My imagination found it exceedingly hard to escape the weight of sucking void I saw in my mind"
+			]
+		},
+		"title": "A Black Hole in your mind"
+	},
+	"Lotustus": {
+		"prompts": {
+			"journal_choice": [
+				"My skin crawled as I beheld dozens on tiny holes arrayed"
+			]
+		},
+		"title": "A dizzying array of holes"
+	},
+	"Fractalization": {
+		"prompts": {
+			"journal_choice": [
+				"A fractal complexity was everywhere, and I felt myself going busy trying to process"
+			]
+		}
+	},
+	"Dentist": {
+		"prompts": {
+			"journal_choice": [
+				"Why was I once more in the Dentist office? Oh right, the bunny teeth",
+				"The dental drill startled me, as the masked face of the dentist appeared to my side"
+			]
+		}
+	},
+	"Jumbletron": {
+		"prompts": {
+			"journal_choice": [
+				"The room seemed to have no begginging and no end, or it just shifted that",
+				"I kept searching for the exit door, but I kept climbing to the ceiling instead"
+			]
+		}
+	},
+	"Surreality": {
+		"prompts": {
+			"journal_choice": [
+				"The next dream was so incomprehensible, just trying to remember it makes my head hurt",
+				"Was that really a dream I saw, or just a fevered psychedelia"
+			]
+		},
+		"title": "The surreal becomes the only real"
+	},
+	"Admninistration": {
+		"prompts": {
+			"journal_choice": [
+				"The office colours appeared even more drab than usual, as the administrator called me into the office. The"
+			]
+		},
+		"title": "Bureaucracy like no other"
+	},
+	"Life Paths": {
+		"prompts": {
+			"journal_choice": [
+				"Of all the many life directions I can choose, which one would lead me to happiness, and which one had the potential to destroy me?",
+				"Lingering shadows left and right of my life path try to influence me to change my decisions, opening new crossroads",
+				"My doubts keep whispering to me, trying to make me change my every decision and thus my life path",
+				"Every choice that lay in the path before me would create another universe of chances, or yet another day in living hell."
+			]
+		},
+		"title": "Analysis Paralysis"
+	},
+	"Cringelord": {
+		"prompts": {
+			"journal_choice": [
+				"Like a twisted carnival of horror my most degrading and embarrassing moments are invading my conscious mind all at once, as",
+				"Descending further into the abyss of my shame stood one [ Cringelorg ] playcard: the fool. Me."
+			]
+		},
+		"title": "The cringe is real"
+	},
+	"Nightmare": {
+		"prompts": {
+			"journal_choice": [
+				"I felt I was living in something from a [ nightmare ] horror film",
+				"It was a nightmare as pure to the word as can be"
+			]
+		},
+		"title": "Out of your deepest horror"
+	},
+	"Submerged": {
+		"prompts": {
+			"journal_choice": [
+				"My lungs were starting to hurt, and the surface of the water was still too far away",
+				"The chilly feeling of forever drowning crept into my bones, while the depth of the icy current",
+				"As I was giving up the struggle to stay above the ice cold water, the last air in my lungs expanded into a painful force",
+				"Barely able to move my frozen body, the cramped muscles and the inability to breathe left me feeling"
+			]
+		},
+		"title": "A Primal Fear of Drowning"
+	},
+	"Handy Aunt": {
+		"prompts": {
+			"journal_choice": [
+				"It wasn't the [ Handsy Aunt ] pinching of my cheeks that annoyed me most, it was the slobbering kisses",
+				"Her overwhelming presence and everybody's expectation of me to comply [ with the Handsy Aunt ] fought a battle in my mind that I could only lose.",
+				"Nothing could compare to my [ handsy ] aunt's overwhelming smell and her drug induced happiness, which is why"
+			]
+		},
+		"title": "Running away from the Pinch"
+	},
+	"Circular Arguments": {
+		"prompts": {
+			"journal_choice": [
+				"Again and again we had the same [ circular ] arguments",
+				"It feels so tiring, dancing with the same [ circular argument ] shadows in my mind over and over again.",
+				"I can barely feel how I am circling around the same problems over and over again, because that futile dance is draining my last bit of sanity from my exhausted mind."
+			]
+		},
+		"title": "The Back and Forth of Fallacy"
+	},
+	"Influencer": {
+		"prompts": {
+			"journal_choice": [
+				"Why couldn't my life be as glamorous as the influencer I was following",
+				"All those beautiful [ influencer ] people with perfect lives make me want to destroy something - myself, preferably.",
+				"Seeing at how well these beautiful [ influencer ] humans are doing, I feel like a discord in a perfect symphony."
+			]
+		},
+		"title": "Always Better than Me"
+	},
+	"Shamelings": {
+		"prompts": {
+			"journal_choice": [
+				"They [ the shamelings ] we all over my bedroom, going through my things and looking for my most cherised possessions"
+			]
+		},
+		"title": "No Secret Stash is Safe"
+	},
+	"The Gatherer": {
+		"prompts": {
+			"journal_choice": [
+				"My dreams were draining from me while the misty figure [ of the gatherer ] stood motionless"
+			]
+		}
+	},
+	"Theatre Play": {
+		"prompts": {
+			"journal_choice": [
+				"I was in a theatre troupe and part of a hyped new play but completely unprepared"
+			]
+		}
+	},
+	"Infinite Corridor": {
+		"prompts": {
+			"journal_choice": [
+				"The corridor kept going on and on, to infinity as I",
+				"Would I ever get out [ of the infinite corridor ] or was I cursed to walk endlessly forward"
+			]
+		}
+	},
+	"Fear and Phobia": {
+		"prompts": {
+			"journal_choice": [
+				"I could feel my phobias rising to the surface as my fears surrounded me"
+			]
+		},
+		"title": "When my Deepest Fear Married My Greatest Phobia."
+	}
+}

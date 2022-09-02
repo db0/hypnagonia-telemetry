@@ -1,16 +1,12 @@
+import json, os, random, re, json, requests, argparse, logging, threading, time
 from flask import Flask
 from flask_restful import Resource, reqparse, Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from uuid import uuid4
-import json, os
-import argparse
 from collections import Counter
-import requests
 
-arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument('-i', '--ip', action="store", default='127.0.0.1', help="The listening IP Address")
-arg_parser.add_argument('-p', '--port', action="store", default='8000', help="The listening Port")
+
 
 evaluating_generations_filename = "evaluating_generations.json"
 finalized_generations_filename = "finalized_generations.json"
@@ -47,54 +43,40 @@ def after_request(response):
 	response.headers["Access-Control-Allow-Headers"] = "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"
 	return response
 
-def instance_verified(kai_instance, sent_model, sent_sp):
-    valid_models = [
-        "KoboldAI/fairseq-dense-2.7B-Nerys",
-        "KoboldAI/fairseq-dense-13B-Nerys",
-        "KoboldAI/fairseq-dense-13B-Nerys-v2",
-    ]
+def regenerate(encounters, encounter, type, amount):
+    logging.info(f"Generating: {encounter} - {type}")
+    ai_prompts = encounters[encounter]['prompts'][type]
+    rindex = random.randint(0, len(ai_prompts) - 1)
+    ai_prompt = ai_prompts[rindex]
+    fmt = {
+        "prompt": ai_prompt,
+        "title": encounters[encounter].get('title', encounter),
+    }
+    title = encounters[encounter].get('title', encounter)
+    prompt = f"[ Title: {title} ]\n{ai_prompt}"
+    gen_dict = {
+        "prompt": prompt, 
+        "params": {"max_length":60, "frmttriminc": True, "n":amount}, 
+        "username": "hypnagonia", 
+        "softprompts": ["surrealism_and_dreams_", ''],
+        "models": ["KoboldAI/fairseq-dense-2.7B-Nerys", "KoboldAI/OPT-6B-nerys-v2", "KoboldAI/fairseq-dense-13B-Nerys-v2", "KoboldAI/fairseq-dense-13B-Nerys"]
+    }
     try:
-        model_req = requests.get(kai_instance + '/api/latest/model')
-        if type(model_req.json()) is not dict:
-            print(f"Validation failed to parse softprompt API: {model_req.text}")
-            return(False)
-        model = model_req.json()["result"]
-    except requests.exceptions.ConnectionError:
-        if "http://127.0.0.1" in kai_instance or "http://localhost" in kai_instance:
-            model = sent_model
-        else:
-            print(f"Validation failed to get URL: {kai_instance}/api/latest/model")
-            return(False)
-    if model not in valid_models:
-        print(f"Validation failed because {model} is not a valid model")
-        return(False)
-    if sent_model != model:
-        print(f"Validation failed because payload model ({sent_model}) != discovered model ({model})")
-        return(False)
-
-    try:
-        softprompt_req = requests.get(kai_instance + "/api/latest/config/soft_prompt")
-        if type(softprompt_req.json()) is not dict:
-            print(f"Validation failed to parse softprompt API: {softprompt_req.text}")
-            return(False)
-        softprompt = softprompt_req.json()["value"]
-    except requests.exceptions.ConnectionError:
-        if "http://127.0.0.1" in kai_instance or "http://localhost" in kai_instance:
-            softprompt = sent_sp
-        else:
-            print(f"Validation failed to get URL: {kai_instance}/api/latest/config/soft_prompt")
-            return(False)
-    valid_softprompts = [
-        "surrealism_and_dreams_2.7B.zip",
-        "surrealism_and_dreams_13B.zip",
-    ]
-    if softprompt not in valid_softprompts:
-        print(f"Validation failed because {softprompt} is not a valid softprompt")
-        return(False)
-    if sent_sp != softprompt:
-        print(f"Validation failed because payload softprompt {sent_sp} != discovered softprompt {softprompt}")
-        return(False)
-    return(True)
+        gen_req = requests.post('https://horde.dbzer0.com/generate/sync', json = gen_dict)
+        new_stories = gen_req.json()
+    except:
+        logging.errror(gen_req.json())
+        return
+    for new_story in new_stories:
+        full_story = re.sub(r" \[ [\w ]+ \]([ .,;])", r'\1', ai_prompt) + new_story
+        logging.info(full_story)
+        evaluating_generations[str(uuid4())] = {
+            "generation": full_story,
+            "ratings": {},
+            "title": encounter,
+            "type": type,
+        }
+    write_to_disk()
 
 class Generation(Resource):
     decorators = [limiter.limit("10/minute")]
@@ -106,9 +88,6 @@ class Generation(Resource):
         parser.add_argument("type", type=str, required=True, help="The type of generation it is. This is used for finding previous such generations")
         parser.add_argument("classification", type=int, required=True, help="An enum for whether the player liked this story and the classification of such")
         parser.add_argument("client_id", type=str, required=True, help="The unique ID for this version of Hypnagonia client")
-        parser.add_argument("kai_instance", type=str, required=True, help="The instance where Kobold AI is running on. We use it for verification.")
-        parser.add_argument("model", type=str, required=True, help="The model the Kobold AI is using. We use it for verification.")
-        parser.add_argument("soft_prompt", type=str, required=True, help="The soft_prompt the Kobold AI is using. We use it for verification.")
         args = parser.parse_args()
         gtitle = args["title"]
         gtype = args["type"]
@@ -123,8 +102,6 @@ class Generation(Resource):
                 finalized_generations[guuid]["ratings"][gclid] = classification
         else:
             if guuid not in evaluating_generations:
-                if not instance_verified(args["kai_instance"],args["model"],args["soft_prompt"]):
-                    return
                 evaluating_generations[guuid] = {
                     "generation": generation,
                     "submitter": gclid,
@@ -166,15 +143,56 @@ class FinalizedGenerations(Resource):
     def options(self):
         return("OK", 200)
 
+def count_evaluations_by_name_type():
+    ordered_dict = {}
+    for evaluation in evaluating_generations:
+        name = evaluating_generations[evaluation]['title']
+        type = evaluating_generations[evaluation]['type']
+        if name not in ordered_dict:
+            ordered_dict[name] = {}
+        if type not in  ordered_dict[name]:
+            ordered_dict[name][type] = 0
+        ordered_dict[name][type] += 1
+    return(ordered_dict)
+
+class GenerateStories(object):
+    def __init__(self, interval = 5):
+        self.interval = interval
+        with open("ai_prompts.json") as file:
+            self.encounters = json.load(file)
+        # logging.info(count_evaluations_by_name_type())
+        thread = threading.Thread(target=self.generate, args=())
+        thread.daemon = True
+        thread.start()
+
+    def generate(self):
+        while True:
+            for encounter in self.encounters:
+                for type in self.encounters[encounter]['prompts']:
+                    amount_of_evals = count_evaluations_by_name_type().get(encounter, {}).get(type,0)
+                    if amount_of_evals < 5 and len(self.encounters[encounter]['prompts'][type]):
+                        amount = 5 - amount_of_evals
+                        # I'll remove this when I start sending sample stories to generate from. Then I'll be able to generate more than 1
+                        # But while I'm sending random prompts, I want to be able to get a different prompt every time
+                        amount = 1 
+                        regenerate(self.encounters, encounter, type, amount)
+                        
+            time.sleep(self.interval)
+
 
 # Parse and print the results
 if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('-i', '--ip', action="store", default='127.0.0.1', help="The listening IP Address")
+    arg_parser.add_argument('-p', '--port', action="store", default='8000', help="The listening Port")
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s',level=logging.DEBUG)
     if os.path.isfile(evaluating_generations_filename):
         with open(evaluating_generations_filename) as db:
             evaluating_generations = json.load(db)
         with open(finalized_generations_filename) as db:
             finalized_generations = json.load(db)
     stat_args = arg_parser.parse_args()
+    GenerateStories()
     api.add_resource(Generation, "/generation/")
     api.add_resource(EvaluatingGenerations, "/generations/evaluating/")
     api.add_resource(FinalizedGenerations, "/generations/finalized/")
