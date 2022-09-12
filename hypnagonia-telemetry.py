@@ -5,9 +5,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from uuid import uuid4
 from collections import Counter
-from logger import logger, set_logger_verbosity, quiesce_logger, test_logger
-
-
+from logger import logger, set_logger_verbosity, quiesce_logger
+from dotenv import load_dotenv
 
 evaluating_generations_filename = "evaluating_generations.json"
 finalized_generations_filename = "finalized_generations.json"
@@ -21,6 +20,7 @@ limiter = Limiter(
 	default_limits=["90 per minute"]
 )
 api = Api(REST_API)
+load_dotenv()
 
 evaluating_generations = {}
 finalized_generations = {}
@@ -63,7 +63,7 @@ def regenerate(encounters, encounter, type, amount):
     gen_dict = {
         "prompt": prompt, 
         "params": {"max_length":60, "frmttriminc": True, "n":amount}, 
-        "username": "hypnagonia", 
+        "api_key": os.getenv('HORDE_API_KEY'), 
         "softprompts": ["surrealism_and_dreams_", ''],
         "models": ["KoboldAI/fairseq-dense-2.7B-Nerys", "KoboldAI/OPT-6B-nerys-v2", "KoboldAI/fairseq-dense-13B-Nerys-v2", "KoboldAI/fairseq-dense-13B-Nerys"]
     }
@@ -71,7 +71,7 @@ def regenerate(encounters, encounter, type, amount):
         gen_req = requests.post('https://horde.dbzer0.com/generate/sync', json = gen_dict)
         new_stories = gen_req.json()
     except:
-        logger.errror(gen_req.json())
+        logger.error(gen_req.json())
         return
     for new_story in new_stories:
         full_story = re.sub(r" \[ [\w ]+ \]([ .,;])", r'\1', ai_prompt) + new_story
