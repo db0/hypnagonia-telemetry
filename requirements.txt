@@ -4,3 +4,4 @@ flask_limiter
 waitress
 requests
 loguru
+dotenv
