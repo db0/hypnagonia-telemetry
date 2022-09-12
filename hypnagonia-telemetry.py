@@ -1,10 +1,11 @@
-import json, os, random, re, json, requests, argparse, logging, threading, time
+import json, os, random, re, json, requests, argparse, threading, time
 from flask import Flask
 from flask_restful import Resource, reqparse, Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from uuid import uuid4
 from collections import Counter
+from logger import logger, set_logger_verbosity, quiesce_logger, test_logger
 
 
 
@@ -44,7 +45,7 @@ def after_request(response):
 	return response
 
 def regenerate(encounters, encounter, type, amount):
-    logging.info(f"Generating: {encounter} - {type}")
+    logger.info(f"Generating: {encounter} - {type}")
     ai_prompts = encounters[encounter]['prompts'][type]
     rindex = random.randint(0, len(ai_prompts) - 1)
     ai_prompt = ai_prompts[rindex]
@@ -70,7 +71,7 @@ def regenerate(encounters, encounter, type, amount):
         gen_req = requests.post('https://horde.dbzer0.com/generate/sync', json = gen_dict)
         new_stories = gen_req.json()
     except:
-        logging.errror(gen_req.json())
+        logger.errror(gen_req.json())
         return
     for new_story in new_stories:
         full_story = re.sub(r" \[ [\w ]+ \]([ .,;])", r'\1', ai_prompt) + new_story
@@ -95,7 +96,7 @@ class Rate(Resource):
         classification = args["classification"]
         if guuid in finalized_generations:
             if gclid not in finalized_generations[guuid]["ratings"]:
-                logging.info(f"Rating ({len(evaluating_generations[guuid]['ratings']) + 1}) received for finalized gen: {finalized_generations[guuid]['title']}")
+                logger.info(f"Rating ({len(evaluating_generations[guuid]['ratings']) + 1}) received for finalized gen: {finalized_generations[guuid]['title']}")
             if gclid in finalized_generations[guuid]["ratings"] and finalized_generations[guuid]["ratings"][gclid] == classification:
                 return(204)
             else:
@@ -105,7 +106,7 @@ class Rate(Resource):
                 return(204)
             else:
                 if gclid not in evaluating_generations[guuid]["ratings"]:
-                    logging.info(f"Rating ({len(evaluating_generations[guuid]['ratings']) + 1}/5) received for evaluating gen: {evaluating_generations[guuid]['title']}")
+                    logger.info(f"Rating ({len(evaluating_generations[guuid]['ratings']) + 1}/5) received for evaluating gen: {evaluating_generations[guuid]['title']}")
                 evaluating_generations[guuid]["ratings"][gclid] = classification
                 # We need 5 different players to evaluate one generation to consider it finalized
 
@@ -115,9 +116,9 @@ class Rate(Resource):
                     # 0 means most people disliked this generation, so we forget the generation if 0 is one of the highest ratings
                     if 0 not in highest_ratings:
                         finalized_generations[guuid] = evaluated_gen
-                        logging.info(f"Finalizing generation {guuid} - {evaluated_gen['title']}")
+                        logger.info(f"Finalizing generation {guuid} - {evaluated_gen['title']}")
                     else:
-                        logging.info(f"Rejecting generation {guuid} - {evaluated_gen['title']}")
+                        logger.info(f"Rejecting generation {guuid} - {evaluated_gen['title']}")
         write_to_disk()
         return(204)
 
@@ -154,7 +155,7 @@ class GenerateStories(object):
         self.interval = interval
         with open("ai_prompts.json") as file:
             self.encounters = json.load(file)
-        # logging.info(count_evaluations_by_name_type())
+        # logger.info(count_evaluations_by_name_type())
         thread = threading.Thread(target=self.generate, args=())
         thread.daemon = True
         thread.start()
@@ -179,13 +180,16 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('-i', '--ip', action="store", default='127.0.0.1', help="The listening IP Address")
     arg_parser.add_argument('-p', '--port', action="store", default='8000', help="The listening Port")
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s',level=logging.DEBUG)
+    arg_parser.add_argument('-v', '--verbosity', action='count', default=0, help="The default logging level is ERROR or higher. This value increases the amount of logging seen in your screen")
+    arg_parser.add_argument('-q', '--quiet', action='count', default=0, help="The default logging level is ERROR or higher. This value decreases the amount of logging seen in your screen")
     if os.path.isfile(evaluating_generations_filename):
         with open(evaluating_generations_filename) as db:
             evaluating_generations = json.load(db)
         with open(finalized_generations_filename) as db:
             finalized_generations = json.load(db)
     stat_args = arg_parser.parse_args()
+    set_logger_verbosity(stat_args.verbosity)
+    quiesce_logger(stat_args.quiet)
     GenerateStories()
     api.add_resource(Rate, "/rate")
     api.add_resource(EvaluatingGenerations, "/generations/evaluating")
